@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Slideshow</title>
+<script>
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+var files = [
+    // List of files goes here
+];
+
+var index = 0;
+var current = null;
+var next = null;
+var previous = null;
+
+function nextIndex(i) {
+    ++i;
+    if (i >= files.length) {
+        return 0;
+    }
+    return i;
+}
+
+function prevIndex(i) {
+    --i;
+    if (i == -1) {
+        return files.length - 1;
+    }
+    return i;
+}
+
+function createNode(filename) {
+    if (filename.endsWith(".mp4") || filename.endsWith(".webm")) {
+        var e = document.createElement("video");
+        e.src = filename;
+        e.load();
+        return e;
+    }
+    var e = document.createElement("img");
+    e.src = filename;
+    e.decode();
+    return e;   
+}
+
+function showCurrent() {
+    document.body.replaceChild(current, document.body.firstChild);
+    if (current instanceof HTMLVideoElement) {
+        current.play();
+    }
+}
+
+function nextSlide() {
+    previous = current;
+    current = next;
+    index = nextIndex(index);
+    next = createNode(files[nextIndex(index)]);
+    showCurrent();
+}
+
+function prevSlide() {
+    next = current;
+    current = previous;
+    index = prevIndex(index);
+    previous = createNode(files[prevIndex(index)]);
+    showCurrent();
+}
+
+function boot() {
+    current = createNode(files[index]);
+    next = createNode(files[nextIndex(index)]);
+    previous = createNode(files[prevIndex(index)]);
+    showCurrent();
+    document.onkeydown = function (e) {
+        switch (e.key) {
+            case "Right":
+            case "ArrowRight":
+            case "Down":
+            case "ArrowDown":
+            case "Space":
+            case "PageDown":
+                nextSlide();
+                break;
+            case "Left":
+            case "ArrowLeft":
+            case "Up":
+            case "ArrowUp":
+            case "Backspace":
+            case "PageUp":
+                prevSlide();
+                break;
+        }
+    }
+    document.onmouseup = function (e) {
+        nextSlide();
+    }
+}
+
+</script>
+<style>
+* {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+</style>
+</head>
+<body onload="boot();">
+</body>
+</html>
